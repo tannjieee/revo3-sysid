@@ -7,9 +7,11 @@ telemetry, emergency software-stop (E-STOP), and one-click ZIP asset download.
 """
 from __future__ import annotations
 
-import asyncio
+import faulthandler
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import importlib.metadata
+import importlib.util
 import io
 import json
 import mimetypes
@@ -30,7 +32,7 @@ import numpy as np
 
 from ._c_rollout import get_c_rollout_lib
 from .closedloop import Revo3ClosedLoopConfig, Revo3ClosedLoopModel
-from .device import DOF, JOINT_NAMES, Revo3Device, discover
+from .device import DOF
 from .isaaclab_actuator import Revo3DifferentialThermalNumpyCore
 from .model import mjcf_joint_names
 from .paths import (
@@ -50,11 +52,63 @@ _PROGRESS_BLOCK_RE = re.compile(r"\[(little|ring|middle|index|thumb_prox|thumb_d
 
 
 def _sdk_available() -> tuple[bool, str]:
+    """Check bc-revo3-sdk availability WITHOUT loading native Rust/Tokio libraries in-process."""
+    if importlib.util.find_spec("bc_revo3_sdk") is None:
+        return False, "not installed"
     try:
-        from bc_revo3_sdk import main_mod
-        return True, str(main_mod.get_sdk_version())
-    except Exception as exc:
-        return False, str(exc)
+        return True, importlib.metadata.version("bc-revo3-sdk")
+    except importlib.metadata.PackageNotFoundError:
+        return True, "installed"
+
+
+def _subproc_env() -> dict[str, str]:
+    env = os.environ.copy()
+    src_dir = str(package_dir().parent)
+    existing_pp = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{existing_pp}" if existing_pp else src_dir
+    env["PYTHONUNBUFFERED"] = "1"
+    return env
+
+
+def _run_hw_worker(
+    action: str,
+    *,
+    port: str | None = None,
+    slave_id: int | None = None,
+    serial: str | None = None,
+    timeout_s: float = 25.0,
+) -> dict:
+    """Execute scan/status/estop in a clean isolated subprocess so native SDK never crashes GUI."""
+    cmd = [sys.executable, "-m", "revo3_sysid._hw_worker", action]
+    if port:
+        cmd.extend(["--port", str(port)])
+    if slave_id is not None:
+        cmd.extend(["--slave-id", str(int(slave_id))])
+    if serial:
+        cmd.extend(["--serial", str(serial)])
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout_s,
+            env=_subproc_env(),
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"硬件操作 ({action}) 超时（>{timeout_s:.0f}s），请检查串口连接或供电。")
+
+    lines = [ln.strip() for ln in (proc.stdout or "").splitlines() if ln.strip()]
+    if lines:
+        try:
+            payload = json.loads(lines[-1])
+            if isinstance(payload, dict):
+                if not payload.get("ok"):
+                    raise RuntimeError(payload.get("error") or f"硬件操作 ({action}) 失败")
+                return payload
+        except json.JSONDecodeError:
+            pass
+    err_detail = (proc.stderr or proc.stdout or f"exit={proc.returncode}").strip()
+    raise RuntimeError(f"硬件子进程 ({action}) 异常退出 (code={proc.returncode}): {err_detail[-300:]}")
 
 
 def _discover_datasets(work_root: Path) -> list[dict]:
@@ -170,7 +224,15 @@ class GuiAppState:
                 self._subscribers.remove(q)
 
     def log(self, text: str, level: str = "info") -> None:
-        self.emit("log", dict(ts=time.strftime("%H:%M:%S"), level=level, text=text))
+        ts = time.strftime("%H:%M:%S")
+        self.emit("log", dict(ts=ts, level=level, text=text))
+        try:
+            log_dir = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "revo3-sysid"
+            log_dir.mkdir(parents=True, exist_ok=True)
+            with (log_dir / "gui_server.log").open("a", encoding="utf-8") as f:
+                f.write(f"[{ts}] ({level}) {text}\n")
+        except Exception:
+            pass
 
     # --- State snapshot -----------------------------------------------------
     def snapshot(self) -> dict:
@@ -227,12 +289,6 @@ class GuiAppState:
             )
             self.active_job = job
 
-        env = os.environ.copy()
-        src_dir = str(package_dir().parent)
-        existing_pp = env.get("PYTHONPATH", "")
-        env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{existing_pp}" if existing_pp else src_dir
-        env["PYTHONUNBUFFERED"] = "1"
-
         self.log(f"$ {' '.join(cmd)}", level="cmd")
         proc = subprocess.Popen(
             cmd,
@@ -241,7 +297,8 @@ class GuiAppState:
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            env=env,
+            env=_subproc_env(),
+            start_new_session=True,
         )
         with self._lock:
             self._proc = proc
@@ -336,17 +393,20 @@ class GuiAppState:
                 self.active_job["stage"] = "正在停止..."
         self.log("用户请求停止当前任务，正在发送 SIGINT/SIGTERM...", level="warn")
         try:
-            proc.send_signal(signal.SIGINT)
+            os.killpg(proc.pid, signal.SIGINT)
             try:
                 proc.wait(timeout=3.0)
             except subprocess.TimeoutExpired:
-                proc.terminate()
+                os.killpg(proc.pid, signal.SIGTERM)
                 try:
                     proc.wait(timeout=3.0)
                 except subprocess.TimeoutExpired:
-                    proc.kill()
+                    os.killpg(proc.pid, signal.SIGKILL)
         except Exception:
-            pass
+            try:
+                proc.terminate()
+            except Exception:
+                pass
         return True
 
     # --- Safe path check ----------------------------------------------------
@@ -412,15 +472,8 @@ def _run_demo_action(state: GuiAppState) -> dict:
     )
 
 
-async def _estop_hardware(port: str | None, slave_id: int, serial: str | None) -> dict:
-    dev = Revo3Device(port=port, slave_id=slave_id, serial=serial, legacy_mit=True)
-    await dev.connect()
-    try:
-        await dev.stop()
-        health = await dev.health(include_config=True)
-        return dict(ok=True, software_stop_enabled=health.get("software_stop_enabled"), health=health)
-    finally:
-        await dev.close()
+def _estop_hardware(port: str | None, slave_id: int, serial: str | None) -> dict:
+    return _run_hw_worker("estop", port=port, slave_id=slave_id, serial=serial, timeout_s=15.0)
 
 
 def _make_handler(state: GuiAppState):
@@ -566,7 +619,8 @@ def _make_handler(state: GuiAppState):
                     slave_id = None if slave_id in (None, "") else int(slave_id)
                     state.log(f"正在扫描 RS-485 总线 (port={port or 'auto'}, slave_id={slave_id or 'all'})...")
                     with state._serial_lock:
-                        devs = asyncio.run(discover(port=port, slave_id=slave_id))
+                        res = _run_hw_worker("scan", port=port, slave_id=slave_id, timeout_s=30.0)
+                    devs = res.get("devices", [])
                     state.last_scan = devs
                     if devs:
                         state.selected_device = dict(
@@ -589,51 +643,12 @@ def _make_handler(state: GuiAppState):
                     serial = body.get("serial") or state.selected_device.get("serial") or None
                     state.selected_device = dict(port=port, slave_id=slave_id, serial=serial)
 
-                    async def _read_status():
-                        dev = Revo3Device(port=port, slave_id=slave_id, serial=serial, legacy_mit=True)
-                        info = await dev.connect()
-                        try:
-                            health = await dev.health(include_config=True)
-                            st = await dev.read()
-                            limits_deg = np.rad2deg(dev.limits).tolist()
-                        finally:
-                            await dev.close()
-                        return info, health, st, limits_deg
-
                     with state._serial_lock:
-                        info, health, st, limits_deg = asyncio.run(_read_status())
-                    q_deg = np.rad2deg(st["qpos"]).tolist()
-                    eff = st["effort"].tolist()
-                    joints = []
-                    warnings = []
-                    for j in range(DOF):
-                        lo, hi = limits_deg[j]
-                        qj = q_deg[j]
-                        out_of_range = (qj < lo - 1.5) or (qj > hi + 1.5)
-                        near_limit = (qj < lo) or (qj > hi)
-                        if out_of_range:
-                            warnings.append(f"J{j:02d} ({JOINT_NAMES[j]}) 当前角度 {qj:+.2f}° 超出软限位 [{lo:.1f}°, {hi:.1f}°] 超过 1.5°，请轻托该手指后再启动采数。")
-                        joints.append(dict(
-                            id=f"J{j:02d}",
-                            index=j,
-                            name=JOINT_NAMES[j],
-                            q_deg=round(qj, 2),
-                            min_deg=round(lo, 1),
-                            max_deg=round(hi, 1),
-                            effort_a=round(eff[j], 3),
-                            fault_code=int(health["motor_fault_codes"][j]),
-                            out_of_range=out_of_range,
-                            near_limit=near_limit,
-                        ))
-                    payload = dict(
-                        ok=True,
-                        device=info,
-                        health=health,
-                        joints=joints,
-                        warnings=warnings,
-                        ts=time.strftime("%H:%M:%S"),
-                    )
+                        payload = _run_hw_worker("status", port=port, slave_id=slave_id, serial=serial, timeout_s=20.0)
                     state.last_status = payload
+                    info = payload["device"]
+                    health = payload["health"]
+                    warnings = payload.get("warnings", [])
                     state.log(
                         f"状态读取成功：{info['serial']} | safety={health['safety_state']} | faults={health['faulted_motor_count']} | stop_latched={health['software_stop_enabled']}",
                         level="warn" if warnings else "ok",
@@ -651,7 +666,7 @@ def _make_handler(state: GuiAppState):
                         serial = body.get("serial") or state.selected_device.get("serial") or None
                         try:
                             with state._serial_lock:
-                                hw_res = asyncio.run(_estop_hardware(port, slave_id, serial))
+                                hw_res = _estop_hardware(port, slave_id, serial)
                             state.log(f"[E-STOP] 已向硬件下发 software_stop()，回读锁存={hw_res.get('software_stop_enabled')}", level="warn")
                         except Exception as exc:
                             hw_res = dict(ok=False, error=str(exc))
@@ -828,10 +843,12 @@ def serve_gui(
     open_browser: bool = True,
     work_root: Path | None = None,
 ) -> int:
+    faulthandler.enable()
     server, state = create_gui_server(host=host, port=port, work_root=work_root)
     actual_port = server.server_address[1]
     url = f"http://{host}:{actual_port}"
     print(f"REVO3-SysID 引导上位机已启动: {url}", flush=True)
+    print(f"运行日志: ~/.cache/revo3-sysid/gui_server.log", flush=True)
     print("按 Ctrl+C 退出上位机服务。", flush=True)
     if open_browser and host in ("127.0.0.1", "localhost"):
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()

@@ -1301,11 +1301,13 @@ function connectSSE() {
   const es = new EventSource("/api/events");
   es.onopen = () => {
     document.getElementById("console-hint").textContent = "已连接本地上位机服务";
+    document.getElementById("console-hint").style.color = "#4ade80";
   };
   es.addEventListener("log", ev => appendLog(JSON.parse(ev.data)));
   es.addEventListener("job", ev => handleJobEvent(JSON.parse(ev.data)));
   es.onerror = () => {
-    document.getElementById("console-hint").textContent = "连接中断，正在重连...";
+    document.getElementById("console-hint").textContent = "⚠️ 本地服务连接中断，正在重连...（请确认终端 revo3-sysid gui 仍在运行）";
+    document.getElementById("console-hint").style.color = "#fbbf24";
   };
 }
 
