@@ -118,6 +118,7 @@ class GuiAppState:
     def __init__(self, work_root: Path | None = None) -> None:
         self.work_root = (Path.cwd() if work_root is None else Path(work_root)).expanduser().resolve()
         self._lock = threading.Lock()
+        self._serial_lock = threading.Lock()
         self._subscribers: list[queue.Queue[str]] = []
         self._log_history: list[dict] = []
         self._proc: subprocess.Popen[str] | None = None
@@ -129,6 +130,16 @@ class GuiAppState:
         self.last_export_out: str | None = str(default_pretrained_dir())
         self.last_export_files: dict[str, str] = {}
         self.selected_device: dict = dict(port=None, slave_id=127, serial=None)
+
+    def is_live_collect_running(self) -> bool:
+        with self._lock:
+            return bool(
+                self._proc is not None
+                and self._proc.poll() is None
+                and self.active_job is not None
+                and self.active_job.get("kind") == "collect"
+                and self.active_job.get("meta", {}).get("run")
+            )
 
     # --- Event bus (SSE) ----------------------------------------------------
     def subscribe(self) -> queue.Queue[str]:
@@ -405,7 +416,7 @@ async def _estop_hardware(port: str | None, slave_id: int, serial: str | None) -
     dev = Revo3Device(port=port, slave_id=slave_id, serial=serial, legacy_mit=True)
     await dev.connect()
     try:
-        await dev.software_stop()
+        await dev.stop()
         health = await dev.health(include_config=True)
         return dict(ok=True, software_stop_enabled=health.get("software_stop_enabled"), health=health)
     finally:
@@ -424,10 +435,12 @@ def _make_handler(state: GuiAppState):
 
         def _send_json(self, payload: dict, status: int = 200) -> None:
             raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            self.close_connection = True
             self.send_response(status)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(raw)))
             self.send_header("Cache-Control", "no-store")
+            self.send_header("Connection", "close")
             self.end_headers()
             self.wfile.write(raw)
 
@@ -445,9 +458,11 @@ def _make_handler(state: GuiAppState):
 
             if path in ("/", "/index.html"):
                 html = (static_dir / "index.html").read_bytes()
+                self.close_connection = True
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.send_header("Content-Length", str(len(html)))
+                self.send_header("Connection", "close")
                 self.end_headers()
                 self.wfile.write(html)
                 return
@@ -492,10 +507,12 @@ def _make_handler(state: GuiAppState):
                     return
                 ctype, _ = mimetypes.guess_type(str(target))
                 data = target.read_bytes()
+                self.close_connection = True
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", ctype or "application/octet-stream")
                 self.send_header("Content-Length", str(len(data)))
                 self.send_header("Cache-Control", "no-store")
+                self.send_header("Connection", "close")
                 self.end_headers()
                 self.wfile.write(data)
                 return
@@ -513,10 +530,12 @@ def _make_handler(state: GuiAppState):
                             zf.write(f, arcname=f.relative_to(target_dir).as_posix())
                 data = buf.getvalue()
                 fname = f"revo3_assets_{target_dir.name}.zip"
+                self.close_connection = True
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "application/zip")
                 self.send_header("Content-Disposition", f'attachment; filename="{fname}"')
                 self.send_header("Content-Length", str(len(data)))
+                self.send_header("Connection", "close")
                 self.end_headers()
                 self.wfile.write(data)
                 return
@@ -539,11 +558,15 @@ def _make_handler(state: GuiAppState):
                     return
 
                 if path == "/api/scan":
+                    if state.is_live_collect_running():
+                        self._send_json(dict(ok=False, error="当前正在实机采数中，串口已占用，请等待采数完成或先停止。"), 409)
+                        return
                     port = body.get("port") or None
                     slave_id = body.get("slave_id")
                     slave_id = None if slave_id in (None, "") else int(slave_id)
                     state.log(f"正在扫描 RS-485 总线 (port={port or 'auto'}, slave_id={slave_id or 'all'})...")
-                    devs = asyncio.run(discover(port=port, slave_id=slave_id))
+                    with state._serial_lock:
+                        devs = asyncio.run(discover(port=port, slave_id=slave_id))
                     state.last_scan = devs
                     if devs:
                         state.selected_device = dict(
@@ -558,6 +581,9 @@ def _make_handler(state: GuiAppState):
                     return
 
                 if path == "/api/status":
+                    if state.is_live_collect_running():
+                        self._send_json(dict(ok=False, error="当前正在实机采数中，已暂停状态读取以避免串口冲突。"), 409)
+                        return
                     port = body.get("port") or state.selected_device.get("port") or None
                     slave_id = int(body.get("slave_id") or state.selected_device.get("slave_id") or 127)
                     serial = body.get("serial") or state.selected_device.get("serial") or None
@@ -574,7 +600,8 @@ def _make_handler(state: GuiAppState):
                             await dev.close()
                         return info, health, st, limits_deg
 
-                    info, health, st, limits_deg = asyncio.run(_read_status())
+                    with state._serial_lock:
+                        info, health, st, limits_deg = asyncio.run(_read_status())
                     q_deg = np.rad2deg(st["qpos"]).tolist()
                     eff = st["effort"].tolist()
                     joints = []
@@ -623,7 +650,8 @@ def _make_handler(state: GuiAppState):
                         slave_id = int(body.get("slave_id") or state.selected_device.get("slave_id") or 127)
                         serial = body.get("serial") or state.selected_device.get("serial") or None
                         try:
-                            hw_res = asyncio.run(_estop_hardware(port, slave_id, serial))
+                            with state._serial_lock:
+                                hw_res = asyncio.run(_estop_hardware(port, slave_id, serial))
                             state.log(f"[E-STOP] 已向硬件下发 software_stop()，回读锁存={hw_res.get('software_stop_enabled')}", level="warn")
                         except Exception as exc:
                             hw_res = dict(ok=False, error=str(exc))
@@ -672,11 +700,20 @@ def _make_handler(state: GuiAppState):
                             return dict(dataset=str(out_path), dry_run=False)
                         return dict(dataset=None, dry_run=not run_live)
 
-                    job = state.start_subprocess_job(
-                        "collect", cmd,
-                        meta=dict(mode=mode, run=run_live, out=str(out_path)),
-                        on_done=_on_collect_done,
-                    )
+                    # Wait for any in-flight /api/status or /api/scan to release the serial port
+                    if run_live:
+                        with state._serial_lock:
+                            job = state.start_subprocess_job(
+                                "collect", cmd,
+                                meta=dict(mode=mode, run=run_live, out=str(out_path)),
+                                on_done=_on_collect_done,
+                            )
+                    else:
+                        job = state.start_subprocess_job(
+                            "collect", cmd,
+                            meta=dict(mode=mode, run=run_live, out=str(out_path)),
+                            on_done=_on_collect_done,
+                        )
                     self._send_json(dict(ok=True, job=job))
                     return
 

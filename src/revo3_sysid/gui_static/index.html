@@ -805,6 +805,7 @@ let collectMode = "full";
 let pollTimer = null;
 
 function goStep(n) {
+  if (n !== 2 && pollTimer) togglePoll();
   document.querySelectorAll(".step-page").forEach(el => el.classList.remove("active"));
   document.getElementById("step-" + n).classList.add("active");
   document.querySelectorAll(".step-tab").forEach(tab => {
@@ -1035,7 +1036,8 @@ function renderStatus(data) {
   document.getElementById("health-summary").style.display = "grid";
   document.getElementById("h-dev").textContent = `${data.device.serial} (fw ${data.device.firmware})`;
   document.getElementById("h-safety").textContent = data.health.safety_state;
-  document.getElementById("h-safety").className = "stat-v " + (data.health.safety_state === "Operational" ? "ok" : "warn");
+  const safetyOk = data.health.safety_state === "Operational" || data.health.safety_state === "Unknown";
+  document.getElementById("h-safety").className = "stat-v " + (safetyOk ? "ok" : "warn");
   document.getElementById("h-faults").textContent = String(data.health.faulted_motor_count);
   document.getElementById("h-faults").className = "stat-v " + (data.health.faulted_motor_count === 0 ? "ok" : "warn");
   document.getElementById("h-stop").textContent = data.health.software_stop_enabled ? "已锁存 (安全)" : "未锁存";
@@ -1105,6 +1107,9 @@ async function runCollect(runLive) {
     return;
   }
   if (pollTimer) togglePoll(); // pause read-only polling during live control
+  const b = document.getElementById("collect-status-banner");
+  b.className = "banner info";
+  b.textContent = runLive ? "⏳ 正在启动实机采数并连接 REVO3 串口..." : "⏳ 正在运行 Dry-Run 碰撞预检...";
   try {
     await apiPost("/api/collect", {
       mode: collectMode,
@@ -1118,7 +1123,9 @@ async function runCollect(runLive) {
     document.getElementById("collect-progress-wrap").style.display = "block";
     document.getElementById("btn-stop-collect").style.display = "inline-flex";
   } catch (err) {
-    alert("启动采数失败：" + err.message);
+    b.className = "banner err";
+    b.textContent = "❌ 启动采数失败：" + err.message + "（如刚修改过代码或关闭终端，请确认 revo3-sysid gui 服务仍在运行并刷新页面）";
+    appendLog({ ts: new Date().toTimeString().slice(0, 8), level: "error", text: "启动采数失败：" + err.message });
   }
 }
 
@@ -1218,16 +1225,21 @@ function handleJobEvent(job) {
     document.getElementById("collect-pct").textContent = `${job.progress}%`;
     document.getElementById("collect-fill").style.width = `${job.progress}%`;
     document.getElementById("btn-stop-collect").style.display = running ? "inline-flex" : "none";
-    if (!running && job.status === "succeeded") {
+    if (!running) {
       const b = document.getElementById("collect-status-banner");
-      if (job.result && !job.result.dry_run && job.result.dataset) {
-        b.className = "banner ok";
-        b.innerHTML = `✅ <b>实机采数完成！</b> 已自动填入 Step 4 数据集路径：<code>${escapeHtml(job.result.dataset)}</code>`;
-        document.getElementById("inp-fit-dataset").value = job.result.dataset;
-        markStepDone(3);
+      if (job.status === "succeeded") {
+        if (job.result && !job.result.dry_run && job.result.dataset) {
+          b.className = "banner ok";
+          b.innerHTML = `✅ <b>实机采数完成！</b> 已自动填入 Step 4 数据集路径：<code>${escapeHtml(job.result.dataset)}</code>`;
+          document.getElementById("inp-fit-dataset").value = job.result.dataset;
+          markStepDone(3);
+        } else {
+          b.className = "banner ok";
+          b.textContent = "✅ Dry-Run 碰撞预检全部通过！勾选 4 项安全确认后即可开始实机采数。";
+        }
       } else {
-        b.className = "banner ok";
-        b.textContent = "✅ Dry-Run 碰撞预检全部通过！勾选 4 项安全确认后即可开始实机采数。";
+        b.className = "banner err";
+        b.textContent = `❌ 采数未完成（${job.stage || job.status}），请查看下方实时日志控制台获取详细原因。`;
       }
       refreshState();
     }
