@@ -1111,7 +1111,7 @@ async function runCollect(runLive) {
   b.className = "banner info";
   b.textContent = runLive ? "⏳ 正在启动实机采数并连接 REVO3 串口..." : "⏳ 正在运行 Dry-Run 碰撞预检...";
   try {
-    await apiPost("/api/collect", {
+    await apiPost("/api/capture", {
       mode: collectMode,
       run: runLive,
       recover_stop: document.getElementById("chk-recover").checked,
@@ -1298,7 +1298,7 @@ function copyCode(id) {
 
 /* ---------- SSE Bootstrap ---------- */
 function connectSSE() {
-  const es = new EventSource("/api/events");
+  const es = new EventSource("/api/stream");
   es.onopen = () => {
     document.getElementById("console-hint").textContent = "已连接本地上位机服务";
     document.getElementById("console-hint").style.color = "#4ade80";

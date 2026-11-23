@@ -524,7 +524,7 @@ def _make_handler(state: GuiAppState):
                 self._send_json(state.snapshot())
                 return
 
-            if path == "/api/events":
+            if path in ("/api/stream", "/api/events"):
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/event-stream")
                 self.send_header("Cache-Control", "no-cache")
@@ -681,7 +681,7 @@ def _make_handler(state: GuiAppState):
                     self._send_json(dict(ok=True, stopped=stopped))
                     return
 
-                if path == "/api/collect":
+                if path in ("/api/capture", "/api/collect"):
                     mode = str(body.get("mode", "full"))
                     run_live = bool(body.get("run", False))
                     recover_stop = bool(body.get("recover_stop", True))

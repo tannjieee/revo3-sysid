@@ -54,7 +54,7 @@ def test_gui_server_demo_dryrun_export_zip_and_security(tmp_path: Path):
         assert len(demo["waveforms"]["j19_sim_deg"]) == 100
 
         # 4. Dry-run collect subprocess completes cleanly without touching hardware
-        code, col = _http_post(f"{base}/api/collect", {"mode": "quick", "run": False, "out": "captures/dry_test"})
+        code, col = _http_post(f"{base}/api/capture", {"mode": "quick", "run": False, "out": "captures/dry_test"})
         assert code == 200 and col["ok"] is True
         deadline = time.time() + 15.0
         final_job = None
