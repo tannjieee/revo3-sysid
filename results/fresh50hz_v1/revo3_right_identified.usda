@@ -1,0 +1,227 @@
+#usda 1.0
+(
+    defaultPrim = "revo3_single"
+    doc = "Identified REVO3 Ultra21 right-hand OpenUSD overlay (PhysX / Isaac Lab / Newton)."
+    metersPerUnit = 1
+    subLayers = [
+        @../../assets/revo3_right/revo3_right.usd@
+    ]
+    upAxis = "Z"
+)
+
+over "revo3_single"
+{
+    over "joints"
+    {
+        over "right_little_MPR_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.004987
+            float physxJoint:jointFriction = 0.038985
+            float drive:angular:physics:stiffness = 4.33802
+            float drive:angular:physics:damping = 0.287798
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_little_MCP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.00245
+            float physxJoint:jointFriction = 0.045465
+            float drive:angular:physics:stiffness = 5.307363
+            float drive:angular:physics:damping = 0.240312
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_little_PIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.0019
+            float physxJoint:jointFriction = 0.04683
+            float drive:angular:physics:stiffness = 4.363981
+            float drive:angular:physics:damping = 0.231376
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_little_DIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002051
+            float physxJoint:jointFriction = 0.033302
+            float drive:angular:physics:stiffness = 5.209051
+            float drive:angular:physics:damping = 0.241137
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_ring_MPR_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.004581
+            float physxJoint:jointFriction = 0.040829
+            float drive:angular:physics:stiffness = 4.753888
+            float drive:angular:physics:damping = 0.226453
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_ring_MCP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.001827
+            float physxJoint:jointFriction = 0.031528
+            float drive:angular:physics:stiffness = 5.145664
+            float drive:angular:physics:damping = 0.231806
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_ring_PIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002006
+            float physxJoint:jointFriction = 0.04496
+            float drive:angular:physics:stiffness = 4.690936
+            float drive:angular:physics:damping = 0.237524
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_ring_DIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.001881
+            float physxJoint:jointFriction = 0.02917
+            float drive:angular:physics:stiffness = 4.500781
+            float drive:angular:physics:damping = 0.232897
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_middle_MPR_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.004255
+            float physxJoint:jointFriction = 0.057235
+            float drive:angular:physics:stiffness = 5.520056
+            float drive:angular:physics:damping = 0.234144
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_middle_MCP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.001915
+            float physxJoint:jointFriction = 0.042511
+            float drive:angular:physics:stiffness = 5.544707
+            float drive:angular:physics:damping = 0.232974
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_middle_PIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002175
+            float physxJoint:jointFriction = 0.033275
+            float drive:angular:physics:stiffness = 4.955434
+            float drive:angular:physics:damping = 0.23709
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_middle_DIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.00253
+            float physxJoint:jointFriction = 0.024259
+            float drive:angular:physics:stiffness = 5.628949
+            float drive:angular:physics:damping = 0.245047
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_index_MPR_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002756
+            float physxJoint:jointFriction = 0.035363
+            float drive:angular:physics:stiffness = 4.772276
+            float drive:angular:physics:damping = 0.224742
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_index_MCP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.001747
+            float physxJoint:jointFriction = 0.041266
+            float drive:angular:physics:stiffness = 5.474846
+            float drive:angular:physics:damping = 0.232705
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_index_PIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002269
+            float physxJoint:jointFriction = 0.040594
+            float drive:angular:physics:stiffness = 4.381408
+            float drive:angular:physics:damping = 0.230198
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_index_DIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002071
+            float physxJoint:jointFriction = 0.025994
+            float drive:angular:physics:stiffness = 4.545349
+            float drive:angular:physics:damping = 0.232943
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_thumb_MCP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002622
+            float physxJoint:jointFriction = 0.058593
+            float drive:angular:physics:stiffness = 4.925777
+            float drive:angular:physics:damping = 0.233643
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_thumb_PIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.00193
+            float physxJoint:jointFriction = 0.032094
+            float drive:angular:physics:stiffness = 5.018846
+            float drive:angular:physics:damping = 0.233854
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_thumb_DIP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.002204
+            float physxJoint:jointFriction = 0.04098
+            float drive:angular:physics:stiffness = 5.016305
+            float drive:angular:physics:damping = 0.238725
+            float drive:angular:physics:maxForce = 0.6
+        }
+        over "right_thumb_CMP_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.00231
+            float physxJoint:jointFriction = 0.031986
+            float drive:angular:physics:stiffness = 4.984134
+            float drive:angular:physics:damping = 0.269856
+            float drive:angular:physics:maxForce = 0.56
+        }
+        over "right_thumb_CMR_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:armature = 0.00231
+            float physxJoint:jointFriction = 0.031986
+            float drive:angular:physics:stiffness = 4.984134
+            float drive:angular:physics:damping = 0.269856
+            float drive:angular:physics:maxForce = 0.56
+        }
+    }
+}

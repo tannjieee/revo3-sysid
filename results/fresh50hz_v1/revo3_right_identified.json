@@ -1,0 +1,539 @@
+{
+  "format": "revo3-sysid-closedloop-v2",
+  "side": "right",
+  "dt": 0.001,
+  "gravity": [
+    -9.81,
+    0.0,
+    0.0
+  ],
+  "thumb_differential": true,
+  "thumb_T": [
+    [
+      0.7071067811865475,
+      0.7071067811865475
+    ],
+    [
+      0.7071067811865475,
+      -0.7071067811865475
+    ]
+  ],
+  "joint_names": [
+    "little_abd",
+    "little_mcp",
+    "little_pip",
+    "little_dip",
+    "ring_abd",
+    "ring_mcp",
+    "ring_pip",
+    "ring_dip",
+    "middle_abd",
+    "middle_mcp",
+    "middle_pip",
+    "middle_dip",
+    "index_abd",
+    "index_mcp",
+    "index_pip",
+    "index_dip",
+    "thumb_cmc_flex",
+    "thumb_mcp",
+    "thumb_ip",
+    "thumb_cmc_abd",
+    "thumb_cmc_rotation"
+  ],
+  "channels": [
+    {
+      "armature": 0.004986759740258439,
+      "damping": 0.07409294068478448,
+      "frictionloss": 0.03898479696437811,
+      "kp_scale": 2.1690101319435127,
+      "kd_scale": 1.0685229768046751,
+      "vel_mult": 1.0110903039996104,
+      "delay_s": 0.0,
+      "bias": 0.010652994280188817,
+      "stiffness": 0.024069663147315682,
+      "springref": -0.5710544232877,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.65,
+        "tau_s": 0.04
+      }
+    },
+    {
+      "armature": 0.002450323693650946,
+      "damping": 0.007571737609065805,
+      "frictionloss": 0.045465392064370044,
+      "kp_scale": 2.6536816920279085,
+      "kd_scale": 1.1637011155686197,
+      "vel_mult": 1.0145222116177008,
+      "delay_s": 0.012,
+      "bias": -0.008169818962774874,
+      "stiffness": 0.041788180587278304,
+      "springref": 1.0302393024976886,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0018995990098741931,
+      "damping": 0.0030656764661584363,
+      "frictionloss": 0.04683000249792301,
+      "kp_scale": 2.181990526681935,
+      "kd_scale": 1.1415481328252701,
+      "vel_mult": 1.0100608304605494,
+      "delay_s": 0.012,
+      "bias": -0.0029561428538535063,
+      "stiffness": 0.03003264293964874,
+      "springref": 1.1025391771361075,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0020508916122481675,
+      "damping": 0.010544042016141892,
+      "frictionloss": 0.03330197950400598,
+      "kp_scale": 2.604525671564776,
+      "kd_scale": 1.1529660968405142,
+      "vel_mult": 1.019082721169086,
+      "delay_s": 0.008,
+      "bias": 0.005956578880649235,
+      "stiffness": 0.006601360717545299,
+      "springref": 1.6038458046418347,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.004580688103555377,
+      "damping": 0.017423613226958623,
+      "frictionloss": 0.040828533104036835,
+      "kp_scale": 2.3769438099349403,
+      "kd_scale": 1.0451444973730861,
+      "vel_mult": 1.0199801468867369,
+      "delay_s": 0.0,
+      "bias": -0.012807049992089651,
+      "stiffness": 0.011312357480666148,
+      "springref": 0.32752588380791936,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.65,
+        "tau_s": 0.04
+      }
+    },
+    {
+      "armature": 0.0018272376815939774,
+      "damping": 0.006661463984505474,
+      "frictionloss": 0.0315279828551372,
+      "kp_scale": 2.572831927217452,
+      "kd_scale": 1.125726448950375,
+      "vel_mult": 1.030316078213027,
+      "delay_s": 0.01,
+      "bias": 0.0038824482154832503,
+      "stiffness": 0.007983638852492612,
+      "springref": 1.8040378204037268,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0020059579339780044,
+      "damping": 0.007018204283806012,
+      "frictionloss": 0.044959545404411126,
+      "kp_scale": 2.345468169376884,
+      "kd_scale": 1.152531695191346,
+      "vel_mult": 1.0117543010226173,
+      "delay_s": 0.01,
+      "bias": 0.02058458376328303,
+      "stiffness": 0.03197544021378217,
+      "springref": 0.5737344966774145,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0018810994770216399,
+      "damping": 0.0023789493064259102,
+      "frictionloss": 0.029169886896055902,
+      "kp_scale": 2.250390297905381,
+      "kd_scale": 1.1525889176334498,
+      "vel_mult": 1.0053023743816942,
+      "delay_s": 0.01,
+      "bias": 0.009274048488045082,
+      "stiffness": 0.0050902187186354034,
+      "springref": 0.9448314540022038,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.004254805545666621,
+      "damping": 0.0213553207318552,
+      "frictionloss": 0.05723538167639513,
+      "kp_scale": 2.760027854027642,
+      "kd_scale": 1.0639462039728542,
+      "vel_mult": 1.0192245459055402,
+      "delay_s": 0.006,
+      "bias": -0.01323738799088002,
+      "stiffness": 0.21575385822296664,
+      "springref": 0.15831023276801087,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.65,
+        "tau_s": 0.04
+      }
+    },
+    {
+      "armature": 0.001914579662104848,
+      "damping": 0.00959970353946327,
+      "frictionloss": 0.0425109713567301,
+      "kp_scale": 2.772353696898483,
+      "kd_scale": 1.1168721860908468,
+      "vel_mult": 1.0149729282105828,
+      "delay_s": 0.012,
+      "bias": 0.013685217685325234,
+      "stiffness": 0.011330422161289246,
+      "springref": 0.503585314265822,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0021745017028616718,
+      "damping": 0.00764503732982349,
+      "frictionloss": 0.033275335174223826,
+      "kp_scale": 2.4777170398169472,
+      "kd_scale": 1.1472259965078233,
+      "vel_mult": 1.0173046306111446,
+      "delay_s": 0.01,
+      "bias": 0.00853725484132034,
+      "stiffness": 0.013509699168001823,
+      "springref": 0.6355933637634117,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.002530352413841582,
+      "damping": 0.014302413134553646,
+      "frictionloss": 0.02425937258432951,
+      "kp_scale": 2.814474424876642,
+      "kd_scale": 1.1537236859162756,
+      "vel_mult": 1.0103524979432355,
+      "delay_s": 0.008,
+      "bias": 0.006586057977945377,
+      "stiffness": 0.0022877824611519226,
+      "springref": 1.255818753247877,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.002755953221361185,
+      "damping": 0.012066135303712157,
+      "frictionloss": 0.035363029469964585,
+      "kp_scale": 2.386137951050189,
+      "kd_scale": 1.0633777975002232,
+      "vel_mult": 1.0145225121292027,
+      "delay_s": 0.014,
+      "bias": 0.014726335654384175,
+      "stiffness": 0.0469362962212006,
+      "springref": 0.19476602874134988,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.65,
+        "tau_s": 0.04
+      }
+    },
+    {
+      "armature": 0.001747043755361554,
+      "damping": 0.002334097003737434,
+      "frictionloss": 0.04126604611948036,
+      "kp_scale": 2.7374229540828243,
+      "kd_scale": 1.1518554662896232,
+      "vel_mult": 1.0249293589171253,
+      "delay_s": 0.012,
+      "bias": 0.004814457588359196,
+      "stiffness": 0.008584906072313629,
+      "springref": 0.9701704283849113,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.002268954410627685,
+      "damping": 0.002056643140412259,
+      "frictionloss": 0.04059376397749384,
+      "kp_scale": 2.1907039004889954,
+      "kd_scale": 1.1407059335451502,
+      "vel_mult": 1.009531349694706,
+      "delay_s": 0.01,
+      "bias": -0.011611081465902538,
+      "stiffness": 0.03197350485199112,
+      "springref": 1.549325664881691,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0020705782192074326,
+      "damping": 0.004116171362049628,
+      "frictionloss": 0.025994330935158794,
+      "kp_scale": 2.2726745785463045,
+      "kd_scale": 1.1441336501988983,
+      "vel_mult": 1.016279754863833,
+      "delay_s": 0.01,
+      "bias": -0.0010271312282557087,
+      "stiffness": 0.01697534397724607,
+      "springref": 1.5277739231131164,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0026220495578949633,
+      "damping": 0.00450836357124569,
+      "frictionloss": 0.05859305997382427,
+      "kp_scale": 2.462888703038352,
+      "kd_scale": 1.1456727335694872,
+      "vel_mult": 1.019852881318819,
+      "delay_s": 0.01,
+      "bias": 0.0225562951064342,
+      "stiffness": 0.039176960721614355,
+      "springref": 0.2904875325140416,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0019303197572722256,
+      "damping": 0.005589309699955401,
+      "frictionloss": 0.03209384757929974,
+      "kp_scale": 2.509422759214738,
+      "kd_scale": 1.1413255198740004,
+      "vel_mult": 1.0141255488057852,
+      "delay_s": 0.012,
+      "bias": -0.0014074006327205058,
+      "stiffness": 0.014848485402704814,
+      "springref": 1.2165553727827758,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0022042961220386102,
+      "damping": 0.006401900223488186,
+      "frictionloss": 0.040980248846671334,
+      "kp_scale": 2.5081523713786,
+      "kd_scale": 1.1616167857734232,
+      "vel_mult": 1.012851008032089,
+      "delay_s": 0.01,
+      "bias": 0.009583834554678844,
+      "stiffness": 0.02239552734508071,
+      "springref": 0.8473582451410695,
+      "current_limit": {
+        "i_cont": 0.6,
+        "i_peak": 0.9,
+        "tau_s": 0.03
+      }
+    },
+    {
+      "armature": 0.0023103439736535157,
+      "damping": 0.00985589155043566,
+      "frictionloss": 0.029929273110772665,
+      "kp_scale": 2.49206718533053,
+      "kd_scale": 1.3,
+      "vel_mult": 1.0100899555960863,
+      "delay_s": 0.012,
+      "bias": 0.0,
+      "stiffness": 0.0,
+      "springref": 0.0,
+      "current_limit": {
+        "i_cont": 0.56,
+        "i_peak": 0.82,
+        "tau_s": 0.04
+      }
+    },
+    {
+      "armature": 0.0023103439736535157,
+      "damping": 0.00985589155043566,
+      "frictionloss": 0.03404355510092933,
+      "kp_scale": 2.49206718533053,
+      "kd_scale": 1.3,
+      "vel_mult": 1.0100899555960863,
+      "delay_s": 0.012,
+      "bias": 0.0,
+      "stiffness": 0.0,
+      "springref": 0.0,
+      "current_limit": {
+        "i_cont": 0.56,
+        "i_peak": 0.82,
+        "tau_s": 0.04
+      }
+    }
+  ],
+  "thumb_joint_stiffness": [
+    0.024733805438309723,
+    0.17954248750568128
+  ],
+  "thumb_joint_springref": [
+    1.2367846094061392,
+    0.8825975282474254
+  ],
+  "thumb_joint_bias": [
+    0.016595719629839474,
+    0.0007548373621669428
+  ],
+  "metadata": {
+    "dataset": "revo3-fresh50hz",
+    "stage": "stage3_cma_v1_final",
+    "train_gains": [
+      [
+        0.5,
+        0.05
+      ],
+      [
+        1.0,
+        0.1
+      ],
+      [
+        1.5,
+        0.2
+      ],
+      [
+        3.0,
+        0.1
+      ],
+      [
+        3.5,
+        0.2
+      ],
+      [
+        4.0,
+        0.05
+      ]
+    ],
+    "heldout_gain": [
+      2.0,
+      0.2
+    ],
+    "blocks": [
+      {
+        "block": "little",
+        "joints": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "dim": 32,
+        "pop": 16,
+        "gens": 90,
+        "seed_weighted_rmse_deg": 0.7372598739222119,
+        "best_weighted_rmse_deg": 0.48514491564087386,
+        "elapsed_s": 57.1
+      },
+      {
+        "block": "ring",
+        "joints": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "dim": 32,
+        "pop": 16,
+        "gens": 90,
+        "seed_weighted_rmse_deg": 0.7190096615843785,
+        "best_weighted_rmse_deg": 0.4741685995579007,
+        "elapsed_s": 57.4
+      },
+      {
+        "block": "middle",
+        "joints": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "dim": 32,
+        "pop": 16,
+        "gens": 90,
+        "seed_weighted_rmse_deg": 0.7090643366468073,
+        "best_weighted_rmse_deg": 0.48194106308175244,
+        "elapsed_s": 57.7
+      },
+      {
+        "block": "index",
+        "joints": [
+          12,
+          13,
+          14,
+          15
+        ],
+        "dim": 32,
+        "pop": 16,
+        "gens": 90,
+        "seed_weighted_rmse_deg": 0.8087253520289581,
+        "best_weighted_rmse_deg": 0.540285266458402,
+        "elapsed_s": 57.8
+      },
+      {
+        "block": "thumb_prox",
+        "joints": [
+          16,
+          17,
+          18
+        ],
+        "dim": 24,
+        "pop": 16,
+        "gens": 90,
+        "seed_weighted_rmse_deg": 0.8884092628888189,
+        "best_weighted_rmse_deg": 0.5849728446205918,
+        "elapsed_s": 67.6
+      },
+      {
+        "block": "thumb_diff",
+        "joints": [
+          19,
+          20
+        ],
+        "dim": 16,
+        "pop": 16,
+        "gens": 110,
+        "seed_weighted_rmse_deg": 0.7213521494382973,
+        "best_weighted_rmse_deg": 0.47603722891309513,
+        "elapsed_s": 776.4
+      }
+    ],
+    "tendon_current_limit_note": "Orthonormal tendon coords u\u00b1 = (I19\u00b1I20)/sqrt(2): measured sustained ~0.56 A, transient peak ~0.82 A"
+  }
+}

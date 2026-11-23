@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "revo3-sysid"
+version = "0.1.0"
+description = "End-to-end 50 Hz closed-loop system identification and MuJoCo / Isaac Lab asset export for BrainCo REVO3 Ultra21 dexterous hand"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "tannjieee" },
+]
+keywords = ["revo3", "brainco", "dexterous-hand", "system-identification", "mujoco", "isaaclab", "robotics"]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "mujoco>=3.2",
+    "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+hardware = [
+    "bc-revo3-sdk==2.3.2",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+revo3-sysid = "revo3_sysid.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

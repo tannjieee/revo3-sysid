@@ -1,0 +1,27 @@
+{
+  "plan_D_thumb_J16_J18.npz": {
+    "passed": true,
+    "checked": 2469,
+    "blocked": []
+  },
+  "plan_C_fingers_J00_J15.npz": {
+    "passed": true,
+    "checked": 2551,
+    "blocked": []
+  },
+  "transition_thumb_to_fingers.npz": {
+    "passed": true,
+    "checked": 300,
+    "blocked": []
+  },
+  "plan_T_diff_unified.npz": {
+    "passed": true,
+    "checked": 4549,
+    "blocked": []
+  },
+  "transition_fingers_to_thumb.npz": {
+    "passed": true,
+    "checked": 300,
+    "blocked": []
+  }
+}
