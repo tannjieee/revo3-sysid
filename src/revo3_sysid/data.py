@@ -56,8 +56,15 @@ class TrialFragment:
 
 
 def load_trial_unified(path: Path | str, side: str | None = None) -> Revo3Trial:
-    """Load either an aiowuji feedback.npz or a PACE raw_pace_order.npz into SDK J0-J20 order."""
+    """Load a capture directory or .npz file (feedback.npz / raw_pace_order.npz) into SDK J0-J20 order."""
     p = Path(path).expanduser().resolve(strict=True)
+    if p.is_dir():
+        for cand in ("feedback.npz", "raw_pace_order.npz"):
+            if (p / cand).is_file():
+                p = p / cand
+                break
+        else:
+            raise FileNotFoundError(f"{p}: no feedback.npz or raw_pace_order.npz found in capture directory")
     with np.load(p, allow_pickle=True) as z:
         keys = set(z.keys())
         names = [str(x) for x in z["joint_names"].tolist()]
