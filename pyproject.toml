@@ -30,9 +30,14 @@ dev = [
 
 [project.scripts]
 revo3-sysid = "revo3_sysid.cli:main"
+revo3-sysid-gui = "revo3_sysid.gui_server:serve_gui"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.package-data]
+revo3_sysid = ["gui_static/*.html"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

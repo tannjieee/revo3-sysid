@@ -1,6 +1,7 @@
 """Beginner-friendly command-line interface for BrainCo REVO3 Ultra21 SysID.
 
 Commands:
+  revo3-sysid gui      Launch the 5-step guided Web GUI host application (上位机)
   revo3-sysid demo     Run a 3-second zero-hardware simulation & asset verification demo
   revo3-sysid scan     Scan RS-485 bus for connected REVO3 hands (read-only)
   revo3-sysid status   Print live REVO3 joint positions, currents, faults, and stop state
@@ -157,6 +158,16 @@ def _cmd_eval(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_gui(args: argparse.Namespace) -> int:
+    from .gui_server import serve_gui
+
+    return serve_gui(
+        host=args.host,
+        port=args.port,
+        open_browser=not args.no_browser,
+    )
+
+
 def _cmd_export(args: argparse.Namespace) -> int:
     cfg = Revo3ClosedLoopConfig.load(args.config)
     exported = export_all_assets(
@@ -184,6 +195,11 @@ def build_parser() -> argparse.ArgumentParser:
         description="BrainCo REVO3 Ultra21 50Hz Closed-Loop System Identification & MuJoCo/Isaac Lab Asset Exporter",
     )
     sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p_gui = sub.add_parser("gui", help="Launch the 5-step guided Web GUI host application (上位机)")
+    p_gui.add_argument("--host", default="127.0.0.1", help="Bind host (use 0.0.0.0 for LAN/SSH access)")
+    p_gui.add_argument("--port", type=int, default=8765, help="HTTP port (default: 8765)")
+    p_gui.add_argument("--no-browser", action="store_true", help="Do not auto-open browser tab")
 
     p_demo = sub.add_parser("demo", help="Zero-hardware verification of bundled MuJoCo & Isaac Lab assets")
     p_demo.add_argument("--config", default=None, help="Optional identified JSON path (defaults to fresh50hz_v1)")
@@ -247,6 +263,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     ap = build_parser()
     args = ap.parse_args(argv)
+    if args.cmd == "gui":
+        return _cmd_gui(args)
     if args.cmd == "demo":
         return _cmd_demo(args)
     if args.cmd == "scan":

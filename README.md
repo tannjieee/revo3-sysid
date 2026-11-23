@@ -40,9 +40,23 @@ pip install -e .
 # 2. 如果要连接真实 REVO3 灵巧手采数，再安装官方 SDK（要求 bc-revo3-sdk==2.3.2）
 pip install -e ".[hardware]"
 
-# 3. 零硬件 3 秒自检：验证内置 MuJoCo XML、Isaac Lab USD 与预辨识模型
+# 3. 推荐小白方式：一键启动 5 步图形引导上位机（零额外依赖，自动打开浏览器）
+revo3-sysid gui
+# （远程 SSH / 局域网访问可运行：revo3-sysid gui --host 0.0.0.0 --port 8765 --no-browser）
+
+# 或命令行零硬件 3 秒自检：
 revo3-sysid demo
 ```
+
+### 1.1 图形引导上位机（`revo3-sysid gui`）
+
+内置零依赖本地 Web 上位机，启动后在浏览器中按 **5 步向导** 即可完成全部操作：
+1. **Step 1 环境自检**：一键检测 SDK / 原生 C 核 / CPU 核心数并绘制 J02、J19 闭环跟踪示范波形；
+2. **Step 2 连接与 21 关节健康体检**：只读扫描 RS-485 串口，按五指分组可视化 21 关节实时角度进度条、电流、故障码及超限提醒；
+3. **Step 3 安全采数向导**：内置 4 项安全确认勾选门禁 + `Dry-Run` 碰撞预检前置 + 实时采集进度条；
+4. **Step 4 2.5 分钟全手辨识**：自动接管刚采好的数据集，实时展示 Stage 1–4 进度与误差柱状图；
+5. **Step 5 资产导出与一键下载**：自由配置 `Kp / Kd / sim_dt` 与 `Standalone` 独立包，一键下载包含 MuJoCo + Isaac Lab 资产的 `.zip` 压缩包；
+- 顶部常驻红色 **`■ E-STOP 软件急停`** 按钮，随时中止任务并向硬件下发 `software_stop()`。
 
 看到 `All bundled MuJoCo & Isaac Lab assets are verified and ready to use!` 即表示环境就绪。
 
