@@ -26,27 +26,48 @@
 
 ## 1. 快速安装与 3 秒零硬件自检
 
-> 系统要求：Linux（推荐 Ubuntu 22.04/24.04），Python ≥ 3.10，安装 `gcc` 可自动启用 5.2× 原生 C 加速核（无 `gcc` 时自动回退，不影响功能）。
+> 系统要求：Linux（推荐 Ubuntu 22.04/24.04），Python ≥ 3.10；安装 `gcc` 可自动启用 5.2× 原生 C 加速核（无 `gcc` 时自动回退，不影响功能）。
+
+### 一键安装（推荐，自动处理 Ubuntu `python3-venv` 问题）
 
 ```bash
 git clone https://github.com/tannjieee/revo3-sysid.git
 cd revo3-sysid
 
-# 1. 创建虚拟环境并安装核心包（纯仿真 / 辨识 / 资产导出）
-python3 -m venv .venv
+# 一键创建 .venv、安装核心包 + REVO3 官方 SDK (bc-revo3-sdk==2.3.2) 并运行零硬件自检
+./scripts/install.sh
+# （如果只需纯仿真 / 导出资产、不接真机，可运行：./scripts/install.sh --sim-only）
+
+# 激活环境并启动 5 步图形引导上位机（自动打开浏览器）
 source .venv/bin/activate
-pip install -e .
-
-# 2. 如果要连接真实 REVO3 灵巧手采数，再安装官方 SDK（要求 bc-revo3-sdk==2.3.2）
-pip install -e ".[hardware]"
-
-# 3. 推荐小白方式：一键启动 5 步图形引导上位机（零额外依赖，自动打开浏览器）
 revo3-sysid gui
 # （远程 SSH / 局域网访问可运行：revo3-sysid gui --host 0.0.0.0 --port 8765 --no-browser）
-
-# 或命令行零硬件 3 秒自检：
-revo3-sysid demo
 ```
+
+### 手动安装（任选一种虚拟环境方式）
+
+- **方式 A：使用 `uv`（最快、免 `sudo`，不依赖系统 `python3-venv`）**
+  ```bash
+  # 若未安装 uv：curl -LsSf https://astral.sh/uv/install.sh | sh
+  rm -rf .venv
+  uv venv .venv && source .venv/bin/activate
+  uv pip install -e ".[hardware]"   # 纯仿真可改为 uv pip install -e .
+  ```
+
+- **方式 B：使用标准 `python3 -m venv`**
+  ```bash
+  # Ubuntu / Debian 如报 "ensurepip is not available"，先补装对应版本的 venv 包并清理残留目录：
+  sudo apt update && sudo apt install -y python3-venv   # Ubuntu 24.04 也可装 python3.12-venv
+  rm -rf .venv
+
+  python3 -m venv .venv && source .venv/bin/activate
+  pip install -e ".[hardware]"      # 纯仿真可改为 pip install -e .
+  ```
+
+- **命令行零硬件 3 秒自检**：
+  ```bash
+  revo3-sysid demo
+  ```
 
 ### 1.1 图形引导上位机（`revo3-sysid gui`）
 
